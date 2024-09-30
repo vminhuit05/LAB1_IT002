@@ -6,17 +6,17 @@ struct Ngay {
 };
 
 struct ThongTinTaiKhoan {
-    string maSo; // Ma so tai khoan
-    string loaiTK; // "ngan han" hoac "dai han"
-    string hoTen; // Ho ten chu tai khoan
-    Ngay ngayMoSo; // Ngay mo tai khoan
-    string cmnd; // So chung minh nhan dan
-    double soTien; // So tien gui
+    string maSo;
+    string loaiTK;
+    string hoTen;
+    Ngay ngayMoSo;
+    string cmnd;
+    double soTien;
 };
 
 map<string, bool> quanLyTaiKhoan;
-map<string, int> laiSuat; // Lai suat theo loai tai khoan
-vector<ThongTinTaiKhoan> dsTaiKhoan; // Danh sach tai khoan
+map<string, int> laiSuat;
+vector<ThongTinTaiKhoan> dsTaiKhoan;
 
 void hienThiTroGiup() {
     cout << "1: Mo tai khoan tiet kiem moi\n";
@@ -116,7 +116,7 @@ void moTaiKhoan() {
         cout << "So tien khong the am. Vui long nhap lai: ";
         cin >> tkMoi.soTien;
     }
-    cin.ignore(); // Xoa bo dem nhap
+    cin.ignore();
 
     dsTaiKhoan.push_back(tkMoi);
 }
@@ -138,7 +138,7 @@ void timKiemTaiKhoan() {
     cout << "3: Tim kiem theo khoang thoi gian\n";
     int option;
     cin >> option;
-    cin.ignore(); // Xoa bo dem nhap
+    cin.ignore();
 
     vector<ThongTinTaiKhoan> ketQua;
     switch (option) {

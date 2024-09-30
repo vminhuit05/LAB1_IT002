@@ -2,14 +2,14 @@
 using namespace std;
 
 #define ll long long
+const int MAX_FLIGHT_CODE_LEN = 5;
 
 struct dates {
     int day, month, year;
 };
 
 struct times {
-    int h;
-    int m;
+    int h, m;
 };
 
 struct flights {
@@ -20,7 +20,6 @@ struct flights {
     string arrive;
 };
 
-// Function to compare two flight times for sorting
 bool compareFlights(const flights &f1, const flights &f2) {
     if (f1.date.year != f2.date.year)
         return f1.date.year < f2.date.year;
@@ -34,11 +33,8 @@ bool compareFlights(const flights &f1, const flights &f2) {
 }
 
 bool isValidFlightCode(const string &code) {
-    if (code.size() > 5) return false;
-    for (char c : code) {
-        if (!isalnum(c)) return false;  // Check if each character is alphanumeric
-    }
-    return true;
+    if (code.size() > MAX_FLIGHT_CODE_LEN) return false;
+    return all_of(code.begin(), code.end(), ::isalnum);
 }
 
 bool isValidDate(const dates &d) {
@@ -46,17 +42,13 @@ bool isValidDate(const dates &d) {
     if (d.month < 1 || d.month > 12) return false;
     if (d.day < 1) return false;
 
-    // Check days in month
-    if (d.month == 2) {
-        if ((d.year % 4 == 0 && d.year % 100 != 0) || (d.year % 400 == 0)) { // Leap year
-            return d.day <= 29;
-        }
-        return d.day <= 28;
-    } else if (d.month == 4 || d.month == 6 || d.month == 9 || d.month == 11) {
-        return d.day <= 30;
-    } else {
-        return d.day <= 31;
+    const vector<int> days_in_month = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+    bool isLeapYear = (d.year % 4 == 0 && d.year % 100 != 0) || (d.year % 400 == 0);
+    if (d.month == 2 && isLeapYear) {
+        return d.day <= 29;
     }
+    return d.day <= days_in_month[d.month - 1];
 }
 
 bool isValidTime(const times &t) {
@@ -64,153 +56,134 @@ bool isValidTime(const times &t) {
 }
 
 bool isValidLocation(const string &location) {
-    return all_of(location.begin(), location.end(), [](char c) {
-        return isalpha(c);  // Check if all characters are alphabetic
-    });
+    return !location.empty() && all_of(location.begin(), location.end(), ::isalpha);
 }
 
-void nhap(flights &fi) {
-    cout << "Nhap ma bay: ";
+void inputFlight(flights &fi) {
+    cout << "Nhập mã chuyến bay (tối đa 5 ký tự chữ và số): ";
     cin >> fi.flight_code;
 
-    if (!isValidFlightCode(fi.flight_code)) {
-        cout << "Ma bay khong hop le!" << endl;
-        fi.flight_code = "";
+    while (!isValidFlightCode(fi.flight_code)) {
+        cout << "Mã chuyến bay không hợp lệ! Vui lòng nhập lại: ";
+        cin >> fi.flight_code;
     }
 
-    cout << "Nhap ngay bay (dd mm yyyy): ";
+    cout << "Nhập ngày bay (dd mm yyyy): ";
     cin >> fi.date.day >> fi.date.month >> fi.date.year;
-
-    if (!isValidDate(fi.date)) {
-        cout << "Ngay khong hop le!" << endl;
-        return;  // Exit if date is invalid
-    } else {
-        cout << "Ngay hop le" << endl;
+    while (!isValidDate(fi.date)) {
+        cout << "Ngày không hợp lệ! Vui lòng nhập lại (dd mm yyyy): ";
+        cin >> fi.date.day >> fi.date.month >> fi.date.year;
     }
 
-    cout << "Nhap gio bay (hh mm): ";
+    cout << "Nhập giờ bay (hh mm): ";
     cin >> fi.time.h >> fi.time.m;
-
-    if (!isValidTime(fi.time)) {
-        cout << "Gio khong hop le!" << endl;
-        return;  // Exit if time is invalid
-    } else {
-        cout << "Gio hop le!" << endl;
+    while (!isValidTime(fi.time)) {
+        cout << "Giờ không hợp lệ! Vui lòng nhập lại (hh mm): ";
+        cin >> fi.time.h >> fi.time.m;
     }
 
-    cout << "Nhap noi di: ";
-    cin >> fi.arrive;
-    if (!isValidLocation(fi.arrive)) {
-        cout << "Noi di khong hop le!" << endl;
-        return;  // Exit if departure location is invalid
-    } else {
-        cout << "Noi di hop le!" << endl;
-    }
-
-    cout << "Nhap noi den: ";
+    cout << "Nhập nơi khởi hành (chỉ ký tự chữ cái): ";
     cin >> fi.depart;
-    if (!isValidLocation(fi.depart)) {
-        cout << "Noi den khong hop le!" << endl;
-        return;  // Exit if arrival location is invalid
-    } else {
-        cout << "Noi den hop le!" << endl;
+    while (!isValidLocation(fi.depart)) {
+        cout << "Nơi khởi hành không hợp lệ! Vui lòng nhập lại: ";
+        cin >> fi.depart;
+    }
+
+    cout << "Nhập nơi đến (chỉ ký tự chữ cái): ";
+    cin >> fi.arrive;
+    while (!isValidLocation(fi.arrive)) {
+        cout << "Nơi đến không hợp lệ! Vui lòng nhập lại: ";
+        cin >> fi.arrive;
     }
 }
 
-void xuat(const flights &fi) {
-    cout << "Flight Code: " << fi.flight_code << endl;
-    cout << "Date: " << fi.date.day << "/" << fi.date.month << "/" << fi.date.year << endl;
-    cout << "Time: " << fi.time.h << ":" << (fi.time.m < 10 ? "0" : "") << fi.time.m << endl;
-    cout << "Departure: " << fi.arrive << endl;
-    cout << "Arrival: " << fi.depart << endl;
+void outputFlight(const flights &fi) {
+    cout << "Mã chuyến bay: " << fi.flight_code << endl;
+    cout << "Ngày bay: " << fi.date.day << "/" << fi.date.month << "/" << fi.date.year << endl;
+    cout << "Giờ bay: " << setw(2) << setfill('0') << fi.time.h << ":" << setw(2) << setfill('0') << fi.time.m << endl;
+    cout << "Nơi khởi hành: " << fi.depart << endl;
+    cout << "Nơi đến: " << fi.arrive << endl;
 }
 
 void searchFlight(const vector<flights> &flightList) {
     string query;
-    cout << "Nhap ma chuyen bay, noi di, hoac noi den de tim: ";
+    cout << "Nhập mã chuyến bay, nơi khởi hành hoặc nơi đến để tìm: ";
     cin >> query;
 
     bool found = false;
     for (const auto &flight : flightList) {
-        if (flight.flight_code == query || flight.arrive == query || flight.depart == query) {
-            xuat(flight);
+        if (flight.flight_code == query || flight.depart == query || flight.arrive == query) {
+            outputFlight(flight);
             found = true;
         }
     }
+
     if (!found) {
-        cout << "Khong tim thay chuyen bay!" << endl;
+        cout << "Không tìm thấy chuyến bay nào!" << endl;
     }
 }
 
 void displayFlightsFromDate(const vector<flights> &flightList, const string &fromLocation, const dates &specificDate) {
-    cout << "Chuyen bay khoi hanh tu " << fromLocation << " vao ngay " << specificDate.day << "/" << specificDate.month << "/" << specificDate.year << ":" << endl;
-    
+    cout << "Chuyến bay khởi hành từ " << fromLocation << " vào ngày " << specificDate.day << "/" << specificDate.month << "/" << specificDate.year << ":" << endl;
+
     bool found = false;
     for (const auto &flight : flightList) {
-        if (flight.arrive == fromLocation && flight.date.day == specificDate.day && flight.date.month == specificDate.month && flight.date.year == specificDate.year) {
-            xuat(flight);
+        if (flight.depart == fromLocation && flight.date.day == specificDate.day &&
+            flight.date.month == specificDate.month && flight.date.year == specificDate.year) {
+            outputFlight(flight);
             found = true;
         }
     }
+
     if (!found) {
-        cout << "Khong co chuyen bay nao!" << endl;
+        cout << "Không có chuyến bay nào cho ngày và địa điểm này!" << endl;
     }
 }
 
 int countFlightsFromTo(const vector<flights> &flightList, const string &fromLocation, const string &toLocation) {
-    int count = 0;
-    for (const auto &flight : flightList) {
-        if (flight.arrive == fromLocation && flight.depart == toLocation) {
-            count++;
-        }
-    }
-    return count;
+    return count_if(flightList.begin(), flightList.end(),
+                    [&](const flights &f) { return f.depart == fromLocation && f.arrive == toLocation; });
 }
 
-void sortFlights(vector<flights> &flightList) {
+void sortAndDisplayFlights(vector<flights> &flightList) {
     sort(flightList.begin(), flightList.end(), compareFlights);
-    cout << "Danh sach chuyen bay da duoc sap xep!" << endl;
+    cout << "Danh sách chuyến bay đã sắp xếp theo ngày và giờ:\n";
+    for (const auto &flight : flightList) {
+        outputFlight(flight);
+        cout << endl;
+    }
 }
 
 int main() {
     vector<flights> flightList;
     char choice;
 
-    // Input flights
     do {
         flights fi;
-        nhap(fi);
+        inputFlight(fi);
         flightList.push_back(fi);
 
-        cout << "Ban co muon nhap chuyen bay khac? (y/n): ";
+        cout << "Bạn có muốn nhập chuyến bay khác không? (y/n): ";
         cin >> choice;
-    } while (choice == 'y' || choice == 'Y');
+    } while (tolower(choice) == 'y');
 
-    // Sort and display flights
-    sortFlights(flightList);
-    cout << "Danh sach chuyen bay sau khi sap xep:" << endl;
-    for (const auto &flight : flightList) {
-        xuat(flight);
-    }
+    sortAndDisplayFlights(flightList);
 
-    // Search for a specific flight
     searchFlight(flightList);
 
-    // Display flights from a specific location on a specific date
     string fromLocation;
     dates specificDate;
-    cout << "Nhap noi khoi hanh: ";
+    cout << "Nhập nơi khởi hành: ";
     cin >> fromLocation;
-    cout << "Nhap ngay (dd mm yyyy): ";
+    cout << "Nhập ngày (dd mm yyyy): ";
     cin >> specificDate.day >> specificDate.month >> specificDate.year;
     displayFlightsFromDate(flightList, fromLocation, specificDate);
 
-    // Count flights from one location to another
     string toLocation;
-    cout << "Nhap noi den: ";
+    cout << "Nhập nơi đến: ";
     cin >> toLocation;
     int count = countFlightsFromTo(flightList, fromLocation, toLocation);
-    cout << "So luong chuyen bay tu " << fromLocation << " den " << toLocation << " la: " << count << endl;
+    cout << "Số lượng chuyến bay từ " << fromLocation << " đến " << toLocation << " là: " << count << endl;
 
     return 0;
 }

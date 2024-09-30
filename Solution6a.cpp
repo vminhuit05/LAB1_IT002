@@ -1,64 +1,72 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-// Ham tim kiem su xuat hien cua A trong B su dung hashing
-int main() {
-    // Nhap kich thuoc cua mang A va B
-    int n, m;
-    cin >> n >> m;
+class Sub {
+private:
+    const vector<int>& A;
+    const vector<int>& B;
 
-    // Khoi tao mang A va B
-    vector<long long> A(n), B(m);
-
-    // Doc du lieu cho mang A
-    for (long long &i : A) cin >> i;
-
-    // Doc du lieu cho mang B
-    for (long long &i : B) cin >> i;
-
-    // Gia tri hash va base cho hash cuon
-    long long hashA = 0, hashB = 0;
-    long long base = 1e18;
-    vector<long long> powbase(m + 1, 0); // Luu tru cac luong luy thua
-
-    // Tinh toan hash cho mang A
-    for (long long i : A) {
-        hashA = hashA * base + i;
+    bool isSub(int pos) const {
+        for (int j = 0; j < A.size(); ++j) {
+            if (B[pos + j] != A[j]) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    // Tinh toan cac luong luy thua
-    powbase[0] = 1;
-    for (int i = 1; i < powbase.size(); i++) {
-        powbase[i] = powbase[i - 1] * base;
-    }
+public:
+    Sub(const vector<int>& A, const vector<int>& B) : A(A), B(B) {}
 
-    // Tinh hash cho n-1 phan tu dau tien cua B
-    for (int i = 0; i < n - 1; i++) {
-        hashB = hashB * base + B[i];
-    }
-
-    // Vector de luu cac chi so bat dau cua su xuat hien
-    vector<int> ans;
-
-    // Hash cuon: Di chuyen qua B va so sanh cac hash
-    for (int i = n - 1; i < m; i++) {
-        // Them phan tu tiep theo vao hashB
-        hashB = hashB * base + B[i];
-
-        // Kiem tra xem hai hash co khop nhau khong
-        if (hashB == hashA) {
-            ans.push_back(i - n + 1); // Luu chi so bat dau
+    void CountSub() const {
+        if (A.size() > B.size()) {
+            cout << "A khong the la chuoi con cua B vi A co kich thuoc lon hon." << endl;
+            return;
         }
 
-        // Loai bo phan tu dau tien trong cua so ra khoi hashB
-        hashB = hashB - powbase[n - 1] * B[i];
+        int cnt = 0;
+        vector<int> positions;
+
+        for (int i = 0; i <= B.size() - A.size(); ++i) {
+            if (isSub(i)) {
+                cnt++;
+                positions.push_back(i);
+            }
+        }
+
+        cout << "So lan xuat hien cua A trong B: " << cnt << endl;
+        if (!positions.empty()) {
+            cout << "Cac vi tri xuat hien: ";
+            for (int pos : positions) {
+                cout << pos << " ";
+            }
+            cout << endl;
+        } else {
+            cout << "Khong tim thay A trong B." << endl;
+        }
+    }
+};
+
+int main() {
+    int n, m;
+    
+    cout << "Nhap so phan tu cua A va B: ";
+    cin >> n >> m;
+
+    vector<int> A(n), B(m);
+
+    cout << "Nhap cac phan tu cua A: ";
+    for (int& x : A) {
+        cin >> x;
     }
 
-    // Xuat so luong xuat hien va cac chi so
-    cout << ans.size() << '\n';
-    for (int v : ans) {
-        cout << v << ' ';
+    cout << "Nhap cac phan tu cua B: ";
+    for (int& x : B) {
+        cin >> x;
     }
+
+    Sub counter(A, B);
+    counter.CountSub();
 
     return 0;
 }
